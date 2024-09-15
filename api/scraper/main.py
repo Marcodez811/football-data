@@ -7,6 +7,7 @@ def obtain_match_df(team_url: str):
     """
     Obtain the dataframe of the team's matching data
     """
+    delay_seconds(5)
     match_data = requests.get(team_url, headers=create_header())
     if match_data is None:
         return None
@@ -17,6 +18,7 @@ def obtain_shooting_df(team_url: str):
     """
     Obtain the dataframe of the team's shooting data
     """
+    delay_seconds(5)
     soup = BeautifulSoup(requests.get(team_url, headers=create_header()).text, "html.parser")
     links = [l.get("href") for l in soup.find_all('a')]
     links = [l for l in links if l and 'all_comps/shooting/' in l]
@@ -27,6 +29,7 @@ def obtain_shooting_df(team_url: str):
         return None
     
     shooting_url = shooting_urls[0]
+    delay_seconds(5)
     shooting_data = requests.get(shooting_url, headers=create_header())
     if shooting_data is None:
         print("The request to obtain the shooting data failed!")
@@ -62,16 +65,13 @@ if __name__ == "__main__":
     all_matches = []
     
     for season in seasons:
+        delay_seconds(5)
         data = requests.get(standings_url, headers=create_header())
         soup = BeautifulSoup(data.text, "html.parser")
         standings_table = soup.select('table.stats_table')[0]
-
         links = [l.get("href") for l in standings_table.find_all('a')]
         links = [l for l in links if l and '/squads/' in l]
         team_urls = [f"https://fbref.com{l}" for l in links]
-
-        previous_season = soup.select("a.prev")[0].get("href")
-        standings_url = f"https://fbref.com{previous_season}"
 
         for team_url in team_urls:
             team_name = team_url.split("/")[-1].replace("-Stats", "").replace("-", " ")
@@ -85,8 +85,9 @@ if __name__ == "__main__":
             if team_df is not None:
                 all_matches.append(team_df)
             print(f"Done with {team_name}'s data!")
-            delay_seconds(5)
-
+            
+        previous_season = soup.select("a.prev")[0].get("href")
+        standings_url = f"https://fbref.com{previous_season}"
 
     match_df = pd.concat(all_matches)
     match_df.columns = [c.lower() for c in match_df.columns]

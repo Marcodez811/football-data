@@ -7,9 +7,11 @@ def delay_seconds(seconds: int) -> None:
     """
     Delay for the specified number of seconds, used for scraping purposes
     """
+    print("Wait... ", end="")
     for i in range(seconds):
-        print(f"Delaying for {seconds - i} second(s)...")
+        print(f"{seconds - i}", end=" ", flush=True)
         time.sleep(1)
+    print()
 
 def create_header() -> str:
     """
@@ -21,4 +23,3 @@ def create_header() -> str:
 
 def parse_html(response: requests.Response) -> StringIO:
     return StringIO(response.text)
-
